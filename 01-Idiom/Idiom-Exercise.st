@@ -13,6 +13,15 @@ TestCase subclass: #IdiomTest
 	poolDictionaries: ''
 	category: 'Idiom-Exercise'!
 
+!IdiomTest methodsFor: 'testing' stamp: 'FGJ 4/22/2017 21:02:03'!
+assert: aBlock raisesError: anException andPreserves: assertions
+	
+	[ aBlock value
+	self fail ]
+		on: anException 
+		do: assertions
+! !
+
 !IdiomTest methodsFor: 'testing' stamp: 'FGJ 4/20/2017 21:34:41'!
 assertAction: aBlockToTime DoesNotTakeMoreThan: timeAllowed
 	
@@ -44,21 +53,21 @@ test02RemovingCustomerShouldNotTakeMoreThan100Milliseconds
 	
 	self assertAction: [customerBook removeCustomerNamed: paulMcCartney] DoesNotTakeMoreThan: 100	! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 5/9/2012 18:12'!
+!IdiomTest methodsFor: 'testing' stamp: 'FGJ 4/22/2017 21:01:48'!
 test03CanNotAddACustomerWithEmptyName 
 
 	| customerBook |
 			
 	customerBook := CustomerBook new.
 
-	[ customerBook addCustomerNamed: ''.
-	self fail ]
-		on: Error 
-		do: [ :anError | 
-			self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage.
-			self assert: customerBook isEmpty ]! !
+	self assert: [ customerBook addCustomerNamed: '']
+	raisesError: Error
+	andPreserves: [ :anError |
+		self assert: anError messageText = CustomerBook customerCanNotBeEmptyErrorMessage.
+		self assert: customerBook isEmpty ].
+			! !
 
-!IdiomTest methodsFor: 'testing' stamp: 'HernanWilkinson 5/16/2012 16:50'!
+!IdiomTest methodsFor: 'testing' stamp: 'FGJ 4/22/2017 21:03:14'!
 test04CanNotRemoveAndInvalidCustomer
 	
 	| customerBook johnLennon |
@@ -67,13 +76,11 @@ test04CanNotRemoveAndInvalidCustomer
 	johnLennon := 'John Lennon'.
 	customerBook addCustomerNamed: johnLennon.
 	
-	[ customerBook removeCustomerNamed: 'Paul McCartney'.
-	self fail ]
-		on: NotFound 
-		do: [ :anError | 
+	self assert: [ customerBook removeCustomerNamed: 'Paul McCartney']
+	raisesError: NotFound
+	andPreserves: [ :anError |
 			self assert: customerBook numberOfCustomers = 1.
-			self assert: (customerBook includesCustomerNamed: johnLennon) ]
-! !
+			self assert: (customerBook includesCustomerNamed: johnLennon) ].! !
 
 
 !classDefinition: #CustomerBook category: #'Idiom-Exercise'!
