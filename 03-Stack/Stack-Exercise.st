@@ -1,3 +1,15 @@
+!classDefinition: #NoHayElemento category: #'Stack-Exercise'!
+Error subclass: #NoHayElemento
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Stack-Exercise'!
+
+!NoHayElemento methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 17:16:32'!
+messageText
+	^'Stack is empty'! !
+
+
 !classDefinition: #OOStackTest category: #'Stack-Exercise'!
 TestCase subclass: #OOStackTest
 	instanceVariableNames: ''
@@ -91,7 +103,7 @@ test07TopDoesNotRemoveObjectFromStack
 	self assert: stack size = 1.
 	! !
 
-!OOStackTest methodsFor: 'test' stamp: 'HAW 4/14/2017 22:48:26'!
+!OOStackTest methodsFor: 'test' stamp: 'M 5/9/2017 18:18:16'!
 test08CanNotPopWhenThereAreNoObjectsInTheStack
 
 	| stack  |
@@ -99,13 +111,13 @@ test08CanNotPopWhenThereAreNoObjectsInTheStack
 	stack := OOStack new.
 	self
 		should: [ stack pop ]
-		raise: Error - MessageNotUnderstood 
+		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = OOStack stackEmptyErrorDescription ]
 		
 ! !
 
-!OOStackTest methodsFor: 'test' stamp: 'HAW 4/14/2017 22:48:36'!
+!OOStackTest methodsFor: 'test' stamp: 'M 5/9/2017 18:18:25'!
 test09CanNotPopWhenThereAreNoObjectsInTheStackAndTheStackHadObjects
 
 	| stack  |
@@ -116,13 +128,13 @@ test09CanNotPopWhenThereAreNoObjectsInTheStackAndTheStackHadObjects
 	
 	self
 		should: [ stack pop ]
-		raise: Error - MessageNotUnderstood 
+		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = OOStack stackEmptyErrorDescription ]
 		
 ! !
 
-!OOStackTest methodsFor: 'test' stamp: 'HAW 4/14/2017 22:48:44'!
+!OOStackTest methodsFor: 'test' stamp: 'M 5/9/2017 18:18:31'!
 test10CanNotTopWhenThereAreNoObjectsInTheStack
 
 	| stack  |
@@ -130,19 +142,81 @@ test10CanNotTopWhenThereAreNoObjectsInTheStack
 	stack := OOStack new.
 	self
 		should: [ stack top ]
-		raise: Error - MessageNotUnderstood 
+		raise: Error - MessageNotUnderstood
 		withExceptionDo: [ :anError |
 			self assert: anError messageText = OOStack stackEmptyErrorDescription ]
 		
 ! !
 
 
-!classDefinition: #OOStack category: #'Stack-Exercise'!
-Object subclass: #OOStack
-	instanceVariableNames: ''
+!classDefinition: #Node category: #'Stack-Exercise'!
+Object subclass: #Node
+	instanceVariableNames: 'next data'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Stack-Exercise'!
+
+!Node methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 16:08:07'!
+data
+	^data.! !
+
+!Node methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 15:57:15'!
+dataIs:anObject
+	data := anObject.! !
+
+!Node methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 15:56:34'!
+next
+	"Retorna el Siguiente Node"
+	^next! !
+
+!Node methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 16:22:42'!
+nextIs: anNode
+	next := anNode.! !
+
+
+!classDefinition: #OOStack category: #'Stack-Exercise'!
+Object subclass: #OOStack
+	instanceVariableNames: 'size top new'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Stack-Exercise'!
+
+!OOStack methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 14:01:52'!
+initialize
+	super initialize.
+	size :=0.
+! !
+
+!OOStack methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 13:39:46'!
+isEmpty
+	"Devuelve true sii la pila es vacia"
+	^size=0! !
+
+!OOStack methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 17:51:48'!
+pop
+	|anObject|
+	size := size -1.
+	anObject := [top data] on: MessageNotUnderstood do: [self error:(NoHayElemento new) messageText].
+	top := top next.
+	^anObject! !
+
+!OOStack methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 16:22:56'!
+push: anObject
+	|nodo|.
+	size := size + 1.
+	nodo := Node new.
+	nodo dataIs:anObject.
+	nodo nextIs:top.
+	top := nodo.! !
+
+!OOStack methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 13:54:14'!
+size
+	^size.! !
+
+!OOStack methodsFor: 'as yet unclassified' stamp: 'M 5/9/2017 18:01:27'!
+top
+	[^top data] on: MessageNotUnderstood do: [self error:(NoHayElemento new) messageText].
+	"^top data"! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
