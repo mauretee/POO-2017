@@ -1,136 +1,184 @@
-!classDefinition: #DistanciaTest category: #'Distance-Solution'!
-TestCase subclass: #DistanciaTest
-	instanceVariableNames: 'unMetro dosMetro cienCentimetros'
+!classDefinition: #Distance category: #'Distance-Solution'!
+Magnitude subclass: #Distance
+	instanceVariableNames: 'amount unit'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:03:59'!
-test01
-	unMetro := Metro with:1.
-	self assert:unMetro = unMetro
-! !
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:47:08'!
+* aNumber
+	^Distance new initializeWith: amount * aNumber of: unit! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:05:17'!
-test02
-	unMetro := Metro with:1.
-	dosMetro := Metro with:2.
-	self assert:(unMetro + unMetro = dosMetro).
-! !
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:46:09'!
++ aDistance
+	|aDistanceConverted|
+	aDistanceConverted := aDistance convertTo: unit.
+	^Distance new initializeWith: amount + aDistanceConverted amount of: unit! !
 
-!DistanciaTest methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:06:14'!
-test03
-	unMetro := Metro with:1.
-	cienCentimetros := Centimetro with:2.
-	self assert:(unMetro + unMetro = dosMetro).
-! !
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:46:31'!
+- aDistance
+	|aDistanceConverted|
+	aDistanceConverted := aDistance convertTo: unit.
+	^Distance new initializeWith: amount - aDistanceConverted amount of: unit! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:47:17'!
+/ aNumber
+	^Distance new initializeWith: amount / aNumber of: unit! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:50:15'!
+< aDistance
+	|aDistanceConverted|
+	aDistanceConverted := aDistance convertTo: unit.	
+	^amount < aDistanceConverted amount! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 22:46:47'!
+= aDistance
+	self class = aDistance class 
+		ifTrue: [ ^self amount * (self unit factor) = ( (aDistance amount) * (aDistance unit factor) ) ]
+		ifFalse: [ ^false ]! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:02:23'!
+amount
+	^amount! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:38:26'!
+convertTo: aUnit
+	|unitAmount|
+	unitAmount := amount * unit factor / aUnit factor.
+	^Distance new initializeWith: unitAmount of: aUnit ! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:43:33'!
+hash
+	^(amount * unit factor) hash! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:34:59'!
+initializeWith: anAmount of: aUnit
+	amount := anAmount.
+	unit := aUnit.! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:48:11'!
+negated
+	^Distance new initializeWith: amount * -1 of: unit! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:25:40'!
+printString
+	|humanReadable|
+	humanReadable := amount printString, ' ', unit metric.
+	amount > 1 
+		ifTrue: [ ^humanReadable, 's' ]
+		ifFalse: [ ^humanReadable ]! !
+
+!Distance methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:02:32'!
+unit
+	^unit! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Distance class' category: #'Distance-Solution'!
+Distance class
+	instanceVariableNames: ''!
+
+!Distance class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:34:28'!
+initializeWith: anAmount of: aUnit
+	^self new initializeWith: anAmount of: aUnit! !
 
 
-!classDefinition: #Distancia category: #'Distance-Solution'!
-Object subclass: #Distancia
-	instanceVariableNames: 'value'
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
-
-!Distancia methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:49:26'!
-= unaDistancia
-	self value = (self class desde:unaDistancia) value.! !
-
-
-!classDefinition: #Centimetro category: #'Distance-Solution'!
-Distancia subclass: #Centimetro
+!classDefinition: #DistanceFactory category: #'Distance-Solution'!
+Object subclass: #DistanceFactory
 	instanceVariableNames: ''
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Centimetro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:57:46'!
-comoCentimetro
-	^self.! !
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:43:38'!
+minusOneMeter
+	^Distance initializeWith: -1 of: Unit meter! !
 
-!Centimetro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:57:41'!
-comoMetro
-	^ Metro value:(value/100).! !
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:44:14'!
+oneCentimeter
+	^Distance initializeWith: 1 of: Unit centimeter! !
 
-!Centimetro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:57:34'!
-comoMilimetro
-	^Milimetro value:(value/10).! !
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:44:34'!
+oneHundredCentimeters
+	^Distance initializeWith: 100 of: Unit centimeter! !
 
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:43:02'!
+oneMeter
+	^Distance initializeWith: 1 of: Unit meter! !
 
-!classDefinition: 'Centimetro class' category: #'Distance-Solution'!
-Centimetro class
-	instanceVariableNames: ''!
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:12:10'!
+twoHundredCentimeters
+	^Distance initializeWith: 200 of: Unit centimeter! !
 
-!Centimetro class methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:00:35'!
-desde:unaDistancia
-	^unaDistancia comoCentimetro.! !
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:45:05'!
+twoMeters
+	^Distance initializeWith: 2 of: Unit meter! !
+
+!DistanceFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:45:14'!
+zeroMeters
+	^Distance initializeWith: 0 of: Unit meter! !
 
 
-!classDefinition: #Metro category: #'Distance-Solution'!
-Distancia subclass: #Metro
-	instanceVariableNames: ''
+!classDefinition: #Unit category: #'Distance-Solution'!
+Object subclass: #Unit
+	instanceVariableNames: 'metric factor'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'Distance-Solution'!
 
-!Metro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:56:38'!
-comoCentimetro
-	^Centimetro value:(value*100).! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:35:11'!
+= aUnit
+	self class = aUnit class
+		ifTrue: [ ^factor = aUnit factor and: [ ^metric = aUnit metric ] ]
+		ifFalse: [ ^false]! !
 
-!Metro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:57:11'!
-comoMetro
-	^self.! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:03:18'!
+factor
+	^factor! !
 
-!Metro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:56:24'!
-comoMilimetro
-	^Milimetro value:(value*1000).! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/5/2017 20:20:02'!
+initializeWith: aMetric factor: aFactor
+	metric := aMetric.
+	factor := aFactor.! !
 
-!Metro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:03:30'!
-initializeWith:unValue
-	^ value := unValue.! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:03:04'!
+metric
+	^metric! !
 
-"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
-
-!classDefinition: 'Metro class' category: #'Distance-Solution'!
-Metro class
-	instanceVariableNames: ''!
-
-!Metro class methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:00:11'!
-desde:unaDistancia
-	^unaDistancia comoMetro.! !
-
-!Metro class methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 19:03:12'!
-with: unValue 
-	^ self new initializeWith:unValue.! !
-
-
-!classDefinition: #Milimetro category: #'Distance-Solution'!
-Distancia subclass: #Milimetro
-	instanceVariableNames: ''
-	classVariableNames: ''
-	poolDictionaries: ''
-	category: 'Distance-Solution'!
-
-!Milimetro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:58:07'!
-comoCentimetro
-	^Centimetro value:(value/10).! !
-
-!Milimetro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:59:11'!
-comoMetro
-	^Metro value:(value/1000).! !
-
-!Milimetro methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:58:11'!
-comoMilimetro
-	^self! !
+!Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:16:51'!
+printString
+	^metric! !
 
 "-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
 
-!classDefinition: 'Milimetro class' category: #'Distance-Solution'!
-Milimetro class
+!classDefinition: 'Unit class' category: #'Distance-Solution'!
+Unit class
 	instanceVariableNames: ''!
 
-!Milimetro class methodsFor: 'as yet unclassified' stamp: 'M 5/30/2017 18:59:44'!
-desde:unaDistancia
-	^ unaDistancia comoMilimetro.! !
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:10:51'!
+centimeter
+	^ self new initializeWith: 'centimeter' factor: 10! !
+
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:20:13'!
+decameter
+	^ self new initializeWith: 'decameter' factor: 10000! !
+
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:19:30'!
+decimeter
+	^ self new initializeWith: 'decimeter' factor: 100! !
+
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:20:03'!
+hectometer
+	^ self new initializeWith: 'hectometer' factor: 100000! !
+
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:20:29'!
+kilometer
+	^ self new initializeWith: 'kilometer' factor: 1000000! !
+
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:10:18'!
+meter
+	^ self new initializeWith: 'meter' factor: 1000! !
+
+!Unit class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 19:10:44'!
+milimeter
+	^ self new initializeWith: 'milimeter' factor: 1! !
