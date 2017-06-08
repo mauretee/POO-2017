@@ -9,11 +9,11 @@ Magnitude subclass: #Measure
 * aNumber
 	^Measure new initializeWith: amount * aNumber of: unit! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:21:54'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/8/2017 18:34:45'!
 + aMeasure
 	aMeasure unit base = unit base
-		ifTrue: [ ^self addOfSameBase: aMeasure ]
-		ifFalse: [ ^MeasureSum with: (Array withAll: #( self aMeasure )) ]! !
+		ifTrue: [ ^self addWithSameBase: aMeasure ]
+		ifFalse: [ ^MeasureSum initializeWith: (Array withAll: #( self aMeasure )) ]! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:30:52'!
 - aMeasure
@@ -39,8 +39,8 @@ Magnitude subclass: #Measure
 		ifTrue: [ ^self unit base = aMeasure unit base and: [(self unit convertToBase value: amount) = (aMeasure unit convertToBase value: (aMeasure amount)) ] ]
 		ifFalse: [ ^false ]! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:08:11'!
-addOfSameBase: aMeasure
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/8/2017 18:33:55'!
+addWithSameBase: aMeasure
 	|baseAmount amountToAdd |
 	baseAmount := aMeasure unit convertToBase value: (aMeasure amount).
 	amountToAdd := unit convertFromBase value: baseAmount.
@@ -77,8 +77,8 @@ printString
 		ifTrue: [ ^humanReadable, 's' ]
 		ifFalse: [ ^humanReadable ]! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:27:11'!
-tryAddOfSameBase: aMeasure
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/8/2017 18:34:10'!
+tryAddWithSameBase: aMeasure
 	aMeasure unit base = unit base
 		ifTrue: [ ^self addOfSameBase: aMeasure ]
 		ifFalse: [ ^self ]! !
@@ -110,6 +110,20 @@ Magnitude subclass: #MeasureSum
 	aMeasure class = Measure
 		ifTrue: [ ^MeasureSum with: (addends collect: [ :each | each tryAddWithSameBase: aMeasure ]) ]
 		ifFalse: [ ^self error: 'Only Measures can be added to a MeasureSum.' ]! !
+
+!MeasureSum methodsFor: 'as yet unclassified' stamp: 'FGJ 6/8/2017 18:49:30'!
+= aMeasureSum
+	aMeasureSum class = Measure
+		ifTrue: [ ^false ]
+		ifFalse: [ ^ (addends allSatisfy: [ :selfEach | aMeasureSum addends anySatisfy: [ :otherEach | selfEach = otherEach ] ]) and: [ aMeasureSum viceversaEqual: self] ]! !
+
+!MeasureSum methodsFor: 'as yet unclassified' stamp: 'FGJ 6/8/2017 18:49:48'!
+addends
+	^addends! !
+
+!MeasureSum methodsFor: 'as yet unclassified' stamp: 'FGJ 6/8/2017 18:49:18'!
+viceversaEqual: aMeasureSum
+	^addends allSatisfy: [ :selfEach | aMeasureSum addends anySatisfy: [ :otherEach | selfEach = otherEach ] ]! !
 
 !MeasureSum methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:10:27'!
 with: someAddends
