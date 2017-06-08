@@ -5,32 +5,33 @@ Magnitude subclass: #Measure
 	poolDictionaries: ''
 	category: 'Measure-Solution'!
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:31:25'!
 * aNumber
-	^Distance new initializeWith: amount * aNumber of: unit! !
+	^Measure new initializeWith: amount * aNumber of: unit! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:24:15'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:21:54'!
 + aMeasure
+	aMeasure unit base = unit base
+		ifTrue: [ ^self addOfSameBase: aMeasure ]
+		ifFalse: [ ^MeasureSum with: (Array withAll: #( self aMeasure )) ]! !
+
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:30:52'!
+- aMeasure
 	|baseAmount amountToAdd |
 	baseAmount := aMeasure unit convertToBase value: (aMeasure amount).
 	amountToAdd := unit convertFromBase value: baseAmount.
-	^Measure new initializeWith: (amount + amountToAdd) of: unit! !
+	^Measure new initializeWith: (amount - amountToAdd) of: unit! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
-- aDistance
-	|aDistanceConverted|
-	aDistanceConverted := aDistance convertTo: unit.
-	^Distance new initializeWith: amount - aDistanceConverted amount of: unit! !
-
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:31:36'!
 / aNumber
-	^Distance new initializeWith: amount / aNumber of: unit! !
+	^Measure new initializeWith: amount / aNumber of: unit! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
-< aDistance
-	|aDistanceConverted|
-	aDistanceConverted := aDistance convertTo: unit.	
-	^amount < aDistanceConverted amount! !
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:39:55'!
+< aMeasure
+	|thisBaseAmount anotherBaseAmount|
+	anotherBaseAmount := aMeasure unit convertToBase value: (aMeasure amount).
+	thisBaseAmount := unit convertToBase value: amount.	
+	^ thisBaseAmount < anotherBaseAmount! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 21:13:17'!
 = aMeasure
@@ -38,15 +39,22 @@ Magnitude subclass: #Measure
 		ifTrue: [ ^self unit base = aMeasure unit base and: [(self unit convertToBase value: amount) = (aMeasure unit convertToBase value: (aMeasure amount)) ] ]
 		ifFalse: [ ^false ]! !
 
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:08:11'!
+addOfSameBase: aMeasure
+	|baseAmount amountToAdd |
+	baseAmount := aMeasure unit convertToBase value: (aMeasure amount).
+	amountToAdd := unit convertFromBase value: baseAmount.
+	^Measure new initializeWith: (amount + amountToAdd) of: unit! !
+
 !Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
 amount
 	^amount! !
 
-!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:44:09'!
 convertTo: aUnit
-	|unitAmount|
-	unitAmount := amount * unit factor / aUnit factor.
-	^Distance new initializeWith: unitAmount of: aUnit ! !
+	aUnit base = unit base
+		ifTrue: [ ^Measure initializeWith: (aUnit convertFromBase value: (unit convertToBase value: amount)) of: aUnit ]
+		ifFalse: [ ^self error: 'Cant convert to a unit with different base.' ]! !
 
 !Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
 hash
@@ -69,6 +77,12 @@ printString
 		ifTrue: [ ^humanReadable, 's' ]
 		ifFalse: [ ^humanReadable ]! !
 
+!Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:27:11'!
+tryAddOfSameBase: aMeasure
+	aMeasure unit base = unit base
+		ifTrue: [ ^self addOfSameBase: aMeasure ]
+		ifFalse: [ ^self ]! !
+
 !Measure methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
 unit
 	^unit! !
@@ -82,6 +96,34 @@ Measure class
 !Measure class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/6/2017 20:18:46'!
 initializeWith: anAmount of: aUnit
 	^self new initializeWith: anAmount of: aUnit! !
+
+
+!classDefinition: #MeasureSum category: #'Measure-Solution'!
+Magnitude subclass: #MeasureSum
+	instanceVariableNames: 'addends'
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'Measure-Solution'!
+
+!MeasureSum methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:26:00'!
++ aMeasure
+	aMeasure class = Measure
+		ifTrue: [ ^MeasureSum with: (addends collect: [ :each | each tryAddWithSameBase: aMeasure ]) ]
+		ifFalse: [ ^self error: 'Only Measures can be added to a MeasureSum.' ]! !
+
+!MeasureSum methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:10:27'!
+with: someAddends
+	addends := someAddends.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'MeasureSum class' category: #'Measure-Solution'!
+MeasureSum class
+	instanceVariableNames: ''!
+
+!MeasureSum class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:10:02'!
+initializeWith: someAddends
+	^self new with: someAddends! !
 
 
 !classDefinition: #MeasureTest category: #'Measure-Solution'!
@@ -104,16 +146,47 @@ testAddMeasuresOfSameBase
 	self assert: (self factory oneMeter + self factory oneHundredCentimeters) = self factory twoMeters.
 	self assert: (self factory oneMinute + self factory oneMinute) = (self factory sixtySeconds + self factory sixtySeconds).! !
 
-!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 21:14:05'!
-testCompareTwoEqualMeasures
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:01:13'!
+testCompareTwoEqualMeasuresAreEqual
 	self assert: self factory oneMeter = self factory oneMeter.
 	self assert: self factory oneCelsius = self factory oneCelsius.
 	self assert: self factory oneMinute = self factory oneMinute.! !
 
-!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 21:16:15'!
-testCompareTwoEquivalentMeasures
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:38:09'!
+testComparesMeasuresOfSameBase
+	self assert: self factory oneMinute < self factory oneDay.
+	self assert: self factory oneMeter >= self factory oneCentimeter.! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:45:52'!
+testConvertsToMeasuresOfSameBase
+	self assert: (self factory oneMeter convertTo: (Unit centimeter)) amount = 100.! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:36:49'!
+testMultiplyByNumber
+	self assert: (self factory oneDay  = (self factory oneMinute * 60 * 24)).! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:56:44'!
+testMultiplyNumberByUnit
+	self assert: (self factory oneDay  = ((60 * 24) * Unit minute)).! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:30:02'!
+testSubstractMeasuresOfSameBase
+	self assert: (self factory oneMeter - self factory oneHundredCentimeters) = self factory zeroMeters.
+	self assert: (self factory twoMinutes - self factory oneMinute) = (self factory twoMinutes - self factory sixtySeconds).! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:01:04'!
+testTwoEquivalentMeasuresAreEqual
 	self assert: self factory oneMeter = self factory oneHundredCentimeters.
 	self assert: self factory oneMinute = self factory sixtySeconds.! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:03:13'!
+testTwoMeasuresOfDifferentBaseAreNotEqual
+	self deny: self factory oneMeter = self factory oneCelsius.
+	self deny: self factory oneKelvin = self factory sixtySeconds.! !
+
+!MeasureTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 23:05:40'!
+testTwoMeasuresOfDifferentBaseCanBeAdded
+	self assert: (self factory oneMeter + self factory oneCelsius) = (self factory oneHundredCentimeters + (274 * (Unit kelvin))).! !
 
 
 !classDefinition: #MeasureFactory category: #'Measure-Solution'!
@@ -167,6 +240,10 @@ twoHundredCentimeters
 twoMeters
 	^Measure initializeWith: 2 of: Unit meter! !
 
+!MeasureFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:30:22'!
+twoMinutes
+	^Measure initializeWith: 2 of: Unit minute! !
+
 !MeasureFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 21:00:38'!
 zeroMeters
 	^Measure initializeWith: 0 of: Unit meter! !
@@ -184,6 +261,12 @@ Object subclass: #Unit
 	self class = aUnit class
 		ifTrue: [ ^factor = aUnit factor and: [ ^metric = aUnit metric ] ]
 		ifFalse: [ ^false]! !
+
+!Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 22:55:00'!
+adaptToInteger: aNumber andSend: aSymbol
+	aSymbol = #*
+		ifTrue: [ ^Measure initializeWith: aNumber of: self ]
+		ifFalse: [ ^self error: 'Multiplication is the only arithmetic operation with number that Unit supports.' ] ! !
 
 !Unit methodsFor: 'as yet unclassified' stamp: 'FGJ 6/7/2017 21:11:13'!
 base
