@@ -1,56 +1,94 @@
 !classDefinition: #TusLibrosTest category: #TusLibros!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'factory carrito'
+	instanceVariableNames: 'carrito cashier tarjetaVencida'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 20:11:09'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:51:00'!
 setUp
-	carrito := Bag new.! !
+	| unCatalogo |
+	unCatalogo := Dictionary new.
+	unCatalogo at: 'libro' put: 5.
+	carrito := Carrito withCatalogo: unCatalogo.
+	
+	cashier := Cashier new.
+	
+	tarjetaVencida := Dictionary new.
+	tarjetaVencida at: 'fechaDeExpiración' put: 4.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 20:11:32'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:24:19'!
 test01NuevoCarritoEstaVacio
 
-	self assert: (carrito isEmpty)! !
+	self assert: (carrito estaVacio)! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 20:11:55'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:25:15'!
 test02UnCarritoNoEstaVacioLuegoDeAgregarUnLibro
 	
-	carrito add: 'libro'.
+	carrito agregar: 'libro'.
 	
-	self deny: (carrito isEmpty).! !
+	self deny: carrito estaVacio.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 20:13:17'!
-testUnCarritoContieneUnLibroLuegoDeAgregarlo
-	| unLibro |
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:26:32'!
+test03UnCarritoContieneUnLibroLuegoDeAgregarlo
 	
-	unLibro := 'AAA'.
+	carrito agregar: 'libro'.
 	
-	carrito add: unLibro.
+	self assert: (carrito productos size = 1)! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:27:09'!
+test04UnCarritoContieneElLibroAgregadoLuegoDeAgregarlo
 	
-	self assert: (carrito size = 1)! !
+	carrito agregar: 'libro'.
+	
+	self assert: (carrito productos includes: 'libro')! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:29:14'!
+test05ElContenidoDelCarritoSonLosLibrosAgregados
+	
+	carrito agregar: 'libro'.
+	self assert: (carrito productos includes: 'libro')! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:29:55'!
+test06NoSePuedenAgregarLibrosQueNoPertenecenAlCatalogo
+	
+	self should: [carrito agregar: 'libroFueraDeCatalogo'] raise: Error description: 'No se puede agregar un libro que no pertenece a la editorial'.
+	self assert: carrito productos size = 0.
+	! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:41:23'!
+test07NoSePuedeHacerCheckoutDeUnCarritoVacio
+	self should: [ cashier checkout: carrito pagandoCon: nil ] raise: Error description: 'No se puede hacer checkout de un carrito vacío'.! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:46:14'!
+test08CuandoLaTarjetaEstaVencidaNoSeLlamaAlMerchantProcessor
+	self should: [ cashier checkout: carrito pagandoCon: nil ] raise: Error description: 'No se puede hacer checkout de un carrito vacío'.! !
 
 
 !classDefinition: #Carrito category: #TusLibros!
 Object subclass: #Carrito
-	instanceVariableNames: 'productos'
+	instanceVariableNames: 'productos catalogo'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/12/2017 20:46:41'!
+!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:23:49'!
+agregar: unLibro
+	self agregar: 1 copiasDe: unLibro.! !
+
+!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:25:49'!
 agregar: unaCantidad copiasDe: unLibro
-	|laCantidad|
-	laCantidad := productos at: unLibro ifPresent: [ :cantidadActual | cantidadActual + unaCantidad ] ifAbsent: [ unaCantidad ].
-	 ^productos add: (Association key: unLibro value: laCantidad)! !
+	unaCantidad < 0 ifTrue: [ self error: 'Solo se pueden agregar cantidades positivas de libros' ].
+	(catalogo includesKey: unLibro) ifFalse: [ self error: 'No se puede agregar un libro que no pertenece a la editorial' ].
+	
+	unaCantidad timesRepeat: [ productos add: unLibro ]! !
 
-!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 19:34:28'!
-copiasDe: unLibro
-	^productos at: unLibro ifPresent: [ :cantidad | cantidad ] ifAbsent: [ 0 ]! !
+!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:08:00'!
+catalogo: unCatalogo
+	catalogo := unCatalogo.! !
 
-!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/12/2017 20:26:58'!
-isEmpty
+!Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:23:58'!
+estaVacio
 	^productos size = 0! !
 
 !Carrito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/12/2017 20:47:45'!
@@ -67,13 +105,32 @@ productos: unosProductos
 Carrito class
 	instanceVariableNames: ''!
 
-!Carrito class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 19:27:06'!
+!Carrito class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:04:46'!
 new
 	|nuevoCarrito|
 	nuevoCarrito := super new.
-	nuevoCarrito productos: Dictionary new.
+	nuevoCarrito productos: Bag new.
 	^nuevoCarrito
 	! !
+
+!Carrito class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:09:59'!
+withCatalogo: unCatalogo
+	| unCarrito |
+	unCarrito := self new.
+	unCarrito catalogo: unCatalogo.
+	^unCarrito! !
+
+
+!classDefinition: #Cashier category: #TusLibros!
+Object subclass: #Cashier
+	instanceVariableNames: ''
+	classVariableNames: ''
+	poolDictionaries: ''
+	category: 'TusLibros'!
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:42:47'!
+checkout: unCarrito pagandoCon: unaTarjeta
+	unCarrito productos isEmpty ifTrue: [ self error: 'No se puede hacer checkout de un carrito vacío' ].! !
 
 
 !classDefinition: #LibrosFactory category: #TusLibros!
