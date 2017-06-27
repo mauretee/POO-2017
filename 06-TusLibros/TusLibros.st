@@ -1,21 +1,24 @@
 !classDefinition: #TusLibrosTest category: #TusLibros!
 TestCase subclass: #TusLibrosTest
-	instanceVariableNames: 'carrito cashier tarjetaVencida'
+	instanceVariableNames: 'carrito cashier tarjetaVencida carritoConLibros tarjeta'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:51:00'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:53:38'!
 setUp
 	| unCatalogo |
 	unCatalogo := Dictionary new.
 	unCatalogo at: 'libro' put: 5.
 	carrito := Carrito withCatalogo: unCatalogo.
 	
-	cashier := Cashier new.
+	carritoConLibros := Carrito withCatalogo: unCatalogo.
+	carritoConLibros agregar: 'libro'.
 	
-	tarjetaVencida := Dictionary new.
-	tarjetaVencida at: 'fechaDeExpiración' put: 4.! !
+	cashier := Cashier vendeElDia: 1 conElLibroDeVentas: Bag new.
+	
+	tarjetaVencida := TarjetaDeCredito expiraEl: 0.
+	tarjeta := TarjetaDeCredito expiraEl: 10.! !
 
 !TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:24:19'!
 test01NuevoCarritoEstaVacio
@@ -60,9 +63,14 @@ test06NoSePuedenAgregarLibrosQueNoPertenecenAlCatalogo
 test07NoSePuedeHacerCheckoutDeUnCarritoVacio
 	self should: [ cashier checkout: carrito pagandoCon: nil ] raise: Error description: 'No se puede hacer checkout de un carrito vacío'.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:46:14'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:41:41'!
 test08CuandoLaTarjetaEstaVencidaNoSeLlamaAlMerchantProcessor
-	self should: [ cashier checkout: carrito pagandoCon: nil ] raise: Error description: 'No se puede hacer checkout de un carrito vacío'.! !
+	self should: [ cashier checkout: carritoConLibros pagandoCon: tarjetaVencida ] raise: Error description: 'No se puede realizar una compra con una tarjeta vencida'.! !
+
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:49:04'!
+test09CuandoLaTarjetaNoTieneCreditoLaVentaNoSeRealiza
+	self should: [ cashier checkout: carritoConLibros pagandoCon: tarjeta ] raise: Error description: 'No se pudo realizar la compra porque la tarjeta no cuenta con crédito suficiente'.
+	self assert: (cashier libroDeVentas size = 0).! !
 
 
 !classDefinition: #Carrito category: #TusLibros!
@@ -123,23 +131,72 @@ withCatalogo: unCatalogo
 
 !classDefinition: #Cashier category: #TusLibros!
 Object subclass: #Cashier
-	instanceVariableNames: ''
+	instanceVariableNames: 'diaDeVenta libroDeVentas'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!Cashier methodsFor: 'as yet unclassified' stamp: 'FGJ 6/25/2017 18:42:47'!
+!Cashier methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:31:02'!
 checkout: unCarrito pagandoCon: unaTarjeta
-	unCarrito productos isEmpty ifTrue: [ self error: 'No se puede hacer checkout de un carrito vacío' ].! !
+	unCarrito productos isEmpty ifTrue: [ self error: 'No se puede hacer checkout de un carrito vacío' ].
+	(unaTarjeta estaExpiradaEl: diaDeVenta) ifTrue: [ self error: 'No se puede realizar una compra con una tarjeta vencida' ]! !
+
+!Cashier methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:34:29'!
+vendeElDia: unaFecha
+	diaDeVenta := unaFecha.! !
+
+
+!Cashier methodsFor: 'initialization' stamp: 'FGJ 6/26/2017 23:03:56'!
+libroDeVentas
+	^libroDeVentas! !
+
+!Cashier methodsFor: 'initialization' stamp: 'FGJ 6/26/2017 22:57:19'!
+vendeElDia: unDia conElLibroDeVentas: unLibroDeVentas 
+	diaDeVenta := unDia.
+	libroDeVentas := unLibroDeVentas.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'Cashier class' category: #TusLibros!
+Cashier class
+	instanceVariableNames: 'libroDeVentas'!
+
+!Cashier class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:34:07'!
+vendeElDia: unaFecha
+	self new vendeElDia: unaFecha! !
+
+
+!Cashier class methodsFor: 'accessing' stamp: 'FGJ 6/26/2017 22:50:49'!
+libroDeVentas
+	^libroDeVentas! !
+
+
+!Cashier class methodsFor: 'instance creation' stamp: 'FGJ 6/26/2017 22:55:34'!
+vendeElDia: unDia conElLibroDeVentas: unLibroDeVentas 
+	self new vendeElDia: unDia conElLibroDeVentas: unLibroDeVentas! !
 
 
-!classDefinition: #LibrosFactory category: #TusLibros!
-Object subclass: #LibrosFactory
-	instanceVariableNames: ''
+!classDefinition: #TarjetaDeCredito category: #TusLibros!
+Object subclass: #TarjetaDeCredito
+	instanceVariableNames: 'vencimiento'
 	classVariableNames: ''
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!LibrosFactory methodsFor: 'as yet unclassified' stamp: 'FGJ 6/13/2017 19:16:09'!
-elQuijote
-	^'ASDFASDF'! !
+!TarjetaDeCredito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:32:14'!
+estaExpiradaEl: unaFecha
+	^vencimiento < unaFecha! !
+
+!TarjetaDeCredito methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:28:44'!
+expiraEl: unaFecha
+	vencimiento := unaFecha.! !
+
+"-- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- "!
+
+!classDefinition: 'TarjetaDeCredito class' category: #TusLibros!
+TarjetaDeCredito class
+	instanceVariableNames: ''!
+
+!TarjetaDeCredito class methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:28:26'!
+expiraEl: unaFecha
+	self new expiraEl: unaFecha! !
