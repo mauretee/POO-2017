@@ -5,7 +5,7 @@ TestCase subclass: #TusLibrosTest
 	poolDictionaries: ''
 	category: 'TusLibros'!
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:53:38'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/27/2017 19:01:17'!
 setUp
 	| unCatalogo |
 	unCatalogo := Dictionary new.
@@ -16,6 +16,7 @@ setUp
 	carritoConLibros agregar: 'libro'.
 	
 	cashier := Cashier vendeElDia: 1 conElLibroDeVentas: Bag new.
+	self assert: ((cashier libroDeVentas) size = 0).
 	
 	tarjetaVencida := TarjetaDeCredito expiraEl: 0.
 	tarjeta := TarjetaDeCredito expiraEl: 10.! !
@@ -67,10 +68,10 @@ test07NoSePuedeHacerCheckoutDeUnCarritoVacio
 test08CuandoLaTarjetaEstaVencidaNoSeLlamaAlMerchantProcessor
 	self should: [ cashier checkout: carritoConLibros pagandoCon: tarjetaVencida ] raise: Error description: 'No se puede realizar una compra con una tarjeta vencida'.! !
 
-!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/26/2017 22:49:04'!
+!TusLibrosTest methodsFor: 'as yet unclassified' stamp: 'FGJ 6/27/2017 18:59:10'!
 test09CuandoLaTarjetaNoTieneCreditoLaVentaNoSeRealiza
 	self should: [ cashier checkout: carritoConLibros pagandoCon: tarjeta ] raise: Error description: 'No se pudo realizar la compra porque la tarjeta no cuenta con crédito suficiente'.
-	self assert: (cashier libroDeVentas size = 0).! !
+	self assert: ((cashier libroDeVentas) size = 0).! !
 
 
 !classDefinition: #Carrito category: #TusLibros!
@@ -171,9 +172,9 @@ libroDeVentas
 	^libroDeVentas! !
 
 
-!Cashier class methodsFor: 'instance creation' stamp: 'FGJ 6/26/2017 22:55:34'!
+!Cashier class methodsFor: 'instance creation' stamp: 'FGJ 6/27/2017 19:06:46'!
 vendeElDia: unDia conElLibroDeVentas: unLibroDeVentas 
-	self new vendeElDia: unDia conElLibroDeVentas: unLibroDeVentas! !
+	^self new vendeElDia: unDia conElLibroDeVentas: unLibroDeVentas! !
 
 
 !classDefinition: #TarjetaDeCredito category: #TusLibros!
